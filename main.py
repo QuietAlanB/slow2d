@@ -5,6 +5,7 @@ from vector2 import *
 from classes.screen import screen
 from classes.Rect import Rect
 from classes.GameManager import GameManager
+from classes.Circle import Circle
 
 # ===== pygame variables =====
 running = True
@@ -13,9 +14,11 @@ tick = 0
 framerate = 60
 gm = GameManager()
 
-r = Rect(Vector2(0, 0), Vector2(100, 100), (255, 255, 255))
+r = Rect(Vector2(50, 50), Vector2(100, 100), (255, 125, 0))
+c = Circle(Vector2(400, 400), 50, (0, 255, 0))
 
 gm.addGameObject(r)
+gm.addGameObject(c)
 
 # ===== main loop =====
 while running:
