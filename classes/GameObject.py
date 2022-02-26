@@ -1,14 +1,34 @@
-from vector2 import Vector2
+from classes.screen import screen
+from classes.components.Transform import Transform
+from classes.components.Mesh import *
+from pygame import gfxdraw
+import pygame
 
 class GameObject:
-    def __init__(self, pos):
-        self.lastPos = pos
-        self.pos = pos
-        self.components = []
+    def __init__(self, components = []):
+        self.components = components
+        self.transform = None
+
+        for c in self.components:
+            if type(c) == Transform:
+                self.transform = c
 
         # TODO:
         # make components and give each an update function
         # and just update them
 
-    def lastPosUpdate(self):
-        self.lastPos = Vector2(self.pos.x, self.pos.y)
+    def addComponent(self, component):
+        self.components.append(component)
+
+    def removeComponent(self, component):
+        self.components.remove(component)
+
+    def update(self):
+        for c in self.components:
+            if type(c) == Mesh:
+                if c.meshType == MeshType.SQUARE:
+                    pygame.draw.rect(screen, c.color, pygame.Rect(self.transform.pos.x, self.transform.pos.y, self.transform.size.x, self.transform.size.y))
+
+                elif c.meshType == MeshType.CIRCLE:
+                    gfxdraw.aaellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
+                    gfxdraw.filled_ellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x) + 1, int(self.transform.size.y) + 1, c.color)
