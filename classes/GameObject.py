@@ -1,3 +1,4 @@
+from classes.components.Text import Text
 from classes.screen import screen
 from classes.components.Transform import Transform
 from classes.components.Texture import Texture
@@ -14,14 +15,11 @@ class GameObject:
             if type(c) == Transform:
                 self.transform = c
 
-
     def addComponent(self, component):
         self.components.append(component)
 
-
     def removeComponent(self, component):
         self.components.remove(component)
-
 
     def update(self):
         for c in self.components:
@@ -35,6 +33,7 @@ class GameObject:
                     gfxdraw.aaellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
                     gfxdraw.filled_ellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x) + 1, int(self.transform.size.y) + 1, c.color)
 
+
             # ===== textures =====
             # also does a quick check for custom sizes
             elif type(c) == Texture:
@@ -42,3 +41,19 @@ class GameObject:
                     c.texture = pygame.transform.scale(c.texture, (self.transform.size.x, self.transform.size.y))
                     
                 screen.blit(c.texture, (self.transform.pos.x, self.transform.pos.y))
+
+
+            # ===== text =====
+            elif type(c) == Text:
+                if type(c.string) == str:
+                    c.string = c.string.split()
+
+                c.lines = len(c.string)
+
+                yPosOffset = 0
+
+                for line in c.string:
+                    line = c.font.font.render(line, True, c.color)
+                    screen.blit(line, (self.transform.pos.x, self.transform.pos.y + yPosOffset))
+                    
+                    yPosOffset += c.font.size + c.lineSpacing

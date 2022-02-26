@@ -10,6 +10,9 @@ from classes.components.Mesh import *
 from classes.GameManager import GameManager
 from classes.components.Transform import Transform
 from classes.components.Texture import Texture
+from classes.components.Text import *
+
+pygame.init()
 
 # ===== pygame variables =====
 running = True
@@ -22,7 +25,7 @@ gm = GameManager()
 frameTest = False
 curTime = None
 
-g = GameObject( [Transform(Vector2(0, 0), Vector2(20, 20)), Mesh(MeshType.SQUARE, (255, 0, 0))] )
+g = GameObject( [Transform(Vector2(0, 0), Vector2(20, 20)), Text("behead", (255, 0, 0), Font("res/srccodelight.ttf", 50))] )
 gm.addGameObject(g)
 
 if frameTest:
@@ -30,6 +33,9 @@ if frameTest:
 
 # ===== main loop =====
 while running:
+    if frameTest and tick == framerate:
+        break
+
     pressed = pygame.key.get_pressed()
     mousePos = Vector2(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
@@ -45,13 +51,12 @@ while running:
     screen.fill((0, 0, 0))
     gm.update()
 
-    if frameTest and tick == framerate:
-        break
-
     pygame.display.update()
     clock.tick(60)
     tick += 1
 
+
+# ===== frame testing stuff =====
 if frameTest:
     avgFramerate = abs(int(framerate / (curTime - time.time())))
 
@@ -59,7 +64,7 @@ if frameTest:
         print(f"======= [FPS test] =======\nExtreme lag detected (Info below)\nAmount of GameObjects: {len(gm.gameObjects)}\nApprox Framerate: {avgFramerate}")
 
     if avgFramerate < 30:
-        print(f"======= [FPS test] =======\nHuge lag detected (Info below)\nAmount of GameObjects: {len(gm.gameObjects)}\nApprox Framerate: {avgFramerate}")
+        print(f"======= [FPS test] =======\nLarge lag detected (Info below)\nAmount of GameObjects: {len(gm.gameObjects)}\nApprox Framerate: {avgFramerate}")
 
     elif avgFramerate < 40:
         print(f"======= [FPS test] =======\nDecent lag detected (Info below)\nAmount of GameObjects: {len(gm.gameObjects)}\nApprox Framerate: {avgFramerate}")
