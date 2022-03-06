@@ -1,10 +1,14 @@
+from classes.components.Collider import Collider
 from classes.components.Text import Text
 from classes.screen import screen
 from classes.components.Transform import Transform
 from classes.components.Texture import Texture
 from classes.components.Mesh import *
 from pygame import gfxdraw
+import math
 import pygame
+
+from lib.vector2 import Vector2
 
 class GameObject:
     def __init__(self, components = []):
@@ -15,23 +19,119 @@ class GameObject:
             if type(c) == Transform:
                 self.transform = c
 
+            if type(c) == Collider:
+                c.transform = self.transform
+
+                angle = self.transform.rotation * (math.pi / 180)
+
+                p = self.transform.topLeft
+                c = self.transform.center
+
+                s = math.sin(angle)
+                co = math.cos(angle)
+
+                p -= c
+
+                xNew = p.x * co - p.y * s
+                yNew = p.x * s + p.y * co
+
+                self.transform.topLeft.x = xNew + c.x
+                self.transform.topLeft.y = yNew + c.y
+
+
+    # ===== add component =====
     def addComponent(self, component):
         self.components.append(component)
 
+    '''
+    def turn(self, angle):
+        c.transform = self.transform
+
+        angle = angle * (math.pi / 180)
+
+        p = self.transform.topLeft
+        c = self.transform.center
+
+        s = math.sin(angle)
+        co = math.cos(angle)
+
+        p -= c
+
+        xNew = p.x * co - p.y * s
+        yNew = p.x * s + p.y * co
+
+        self.transform.topLeft.x = xNew + c.x
+        self.transform.topLeft.y = yNew + c.y
+    '''
+
+    # ===== remove component =====
     def removeComponent(self, component):
         self.components.remove(component)
 
+
+    # ===== get component =====
+    def getComponent(self, component):
+        for c in self.components:
+            if type(c) == component:
+                return c
+
+        return None
+
+
+    # ===== last update =====
+    def lastUpdate(self):
+        for c in self.components:
+            if type(c) == Collider:
+                c.lastActivated = c.activated
+
+
+    # ===== update =====
     def update(self):
         for c in self.components:
             if type(c) == Mesh:
                 # ===== square =====
-                if c.meshType == MeshType.SQUARE:
-                    pygame.draw.rect(screen, c.color, pygame.Rect(self.transform.pos.x, self.transform.pos.y, self.transform.size.x, self.transform.size.y))
+                if c.meshType == MeshType.SQUARE:   
+                    s = pygame.Surface((self.transform.size.x , self.transform.size.y), pygame.SRCALPHA)
+
+                    pygame.draw.rect(s, c.color, pygame.Rect(0, 0, self.transform.size.x, self.transform.size.y))
+
+                    rotated_image = pygame.transform.rotozoom(s, self.transform.rotation, 1)
+                    new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
+
+                    # === all coordinate adjustments ===
+                    #self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
+                    #self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
+                    #self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
+                    #self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+
+                    #self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
+                    self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
+                    self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
+                    self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+
+                    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(self.transform.topLeft.x, self.transform.topLeft.y, 3, 3))
+
+                    # === draw ===
+                    screen.blit(rotated_image, (new_rect))
 
                 # ===== circle =====
                 elif c.meshType == MeshType.CIRCLE:
-                    gfxdraw.aaellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
-                    gfxdraw.filled_ellipse(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x) + 1, int(self.transform.size.y) + 1, c.color)
+                    s = pygame.Surface((self.transform.size.x * 2, self.transform.size.y * 2), pygame.SRCALPHA)
+
+                    gfxdraw.aaellipse(s, int(self.transform.size.x), int(self.transform.size.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
+                    gfxdraw.filled_ellipse(s, int(self.transform.size.x), int(self.transform.size.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
+
+                    rotated_image = pygame.transform.rotozoom(s, self.transform.rotation, 1)
+                    new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
+
+                    # === all coordinate adjustments ===
+                    self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
+                    self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
+                    self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
+                    self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+
+                    # === draw ===
+                    screen.blit(rotated_image, (new_rect))
 
 
             # ===== textures =====
@@ -39,8 +139,18 @@ class GameObject:
             elif type(c) == Texture:
                 if c.texture.get_size() != (self.transform.size.x, self.transform.size.y):
                     c.texture = pygame.transform.scale(c.texture, (self.transform.size.x, self.transform.size.y))
-                    
-                screen.blit(c.texture, (self.transform.pos.x, self.transform.pos.y))
+
+                rotated_image = pygame.transform.rotozoom(c.texture, self.transform.rotation, 1)
+                new_rect = rotated_image.get_rect(center = c.texture.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
+
+                # === all coordinate adjustments ===
+                self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
+                self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
+                self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
+                self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+
+                # === draw ===
+                screen.blit(rotated_image, (new_rect))
 
 
             # ===== text =====
@@ -57,3 +167,26 @@ class GameObject:
                     screen.blit(line, (self.transform.pos.x, self.transform.pos.y + yPosOffset))
                     
                     yPosOffset += c.font.size + c.lineSpacing
+
+
+            # ===== collider =====
+            elif type(c) == Collider:
+                c.transform = self.transform
+
+                s = pygame.Surface((self.transform.size.x , self.transform.size.y), pygame.SRCALPHA)
+
+                if c.viewMode:
+                    pygame.draw.rect(s, (0, 200, 0), pygame.Rect(0, 0, self.transform.size.x - 1, self.transform.size.y - 1), 1)
+
+                rotated_image = pygame.transform.rotozoom(s, self.transform.rotation, 1)
+                new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
+
+                # === all coordinate adjustments ===
+                self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
+                self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
+                self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
+                self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+
+                # === draw ===
+                if c.viewMode:
+                    screen.blit(rotated_image, new_rect)

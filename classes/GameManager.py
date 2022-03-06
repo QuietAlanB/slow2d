@@ -7,6 +7,11 @@ class GameManager:
         for gameObject in self.gameObjects:
             gameObject.update()
 
+    # ===== last pos update function =====
+    def lastUpdate(self):
+        for gameObject in self.gameObjects:
+            gameObject.lastUpdate()
+
     # ===== game object list functions =====
     def addGameObject(self, object):
         self.gameObjects.append(object)

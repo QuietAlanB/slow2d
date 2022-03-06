@@ -55,7 +55,7 @@ class Vector2:
     # >=
     def __ge__(self, other):
         try:
-            if self.x >= other.x or self.y >= other.y:
+            if self.x >= other.x and self.y >= other.y:
                 return True
             return False
         except:
@@ -65,7 +65,7 @@ class Vector2:
     # >
     def __gt__(self, other):
         try:
-            if self.x > other.x or self.y > other.y:
+            if self.x > other.x and self.y > other.y:
                 return True
             return False
         except:
@@ -75,7 +75,7 @@ class Vector2:
     # <=
     def __le__(self, other):
         try:
-            if self.x <= other.x or self.y <= other.y:
+            if self.x <= other.x and self.y <= other.y:
                 return True
             return False
         except:
@@ -85,7 +85,7 @@ class Vector2:
     # <
     def __lt__(self, other):
         try:
-            if self.x < other.x or self.y < other.y:
+            if self.x < other.x and self.y < other.y:
                 return True
             return False
         except:
