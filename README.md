@@ -1,5 +1,2 @@
 # Slow2d
- 2d game engine im making
- its actually for a school project but im also doing it for fun
- 
- (project currently paused)
+a game engine i made which i will probably use for a lot of projects in the future
