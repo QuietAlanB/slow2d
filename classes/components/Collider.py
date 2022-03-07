@@ -4,35 +4,8 @@ from classes.screen import screen
 
 class Collider:
     def __init__(self):
-        self.lastActivated = False
-        self.activated = False
         self.transform = None
         self.viewMode = False
-
-    def onCollisionEnter(self, gameObject):
-        if (gameObject.transform.pos.x + gameObject.transform.size.x > self.transform.pos.x and
-            gameObject.transform.pos.x < self.transform.pos.x + self.transform.size.x and
-            gameObject.transform.pos.y + gameObject.transform.size.y > self.transform.pos.y and
-            gameObject.transform.pos.y < self.transform.pos.y + self.transform.size.y):
-                #print(self.activated)
-                if not self.activated:
-                    self.activated = True
-                    return True
-
-        return False
-
-
-    def onCollisionExit(self, gameObject):
-        if not (gameObject.transform.pos.x + gameObject.transform.size.x > self.transform.pos.x and
-            gameObject.transform.pos.x < self.transform.pos.x + self.transform.size.x and
-            gameObject.transform.pos.y + gameObject.transform.size.y > self.transform.pos.y and
-            gameObject.transform.pos.y < self.transform.pos.y + self.transform.size.y ):
-                if self.activated:
-                    self.activated = False
-                    return True
-
-        return False
-
 
     def onCollisionStay(self, gameObject):
         axes = [self.transform.topRight - self.transform.topLeft, 

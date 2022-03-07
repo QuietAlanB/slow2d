@@ -26,15 +26,9 @@ gm = GameManager()
 frameTest = False
 curTime = None
 
-g = GameObject( [Transform(Vector2(100, 100), Vector2(128, 64), 0), Mesh(MeshType.SQUARE, (255, 0, 0)) ] )
-#a = GameObject( [ Transform(Vector2(100, 300), Vector2(128, 64), 0), Mesh(MeshType.SQUARE, (0, 255, 0)), Collider() ] )
-a = GameObject( [ Transform(Vector2(100, 300), Vector2(128, 64), 0), Collider() ] )
-a.getComponent(Collider).viewMode = True
-#t = GameObject( [ Transform(Vector2(400, 300), Vector2(128, 64), 0), Text("hello", (255, 255, 0), Font("res/srccodelight.ttf", 40)) ] )
+g = GameObject( [Transform(Vector2(100, 100), Vector2(64, 64), 0), Mesh(MeshType.SQUARE, (255, 0, 0)) ] )
 
 gm.addGameObject(g)
-gm.addGameObject(a)
-#gm.addGameObject(t)
 
 if frameTest:
     curTime = time.time()
@@ -61,9 +55,6 @@ while running:
 
     if pressed[pygame.K_r]: 
         g.transform.rotation += 2
-
-    if a.getComponent(Collider).onCollisionStay(g):
-        print(f"ok: {tick}")
 
     screen.fill((0, 0, 0))
     gm.update()

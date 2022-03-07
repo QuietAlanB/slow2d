@@ -11,4 +11,6 @@ class Transform:
         self.bottomLeft = self.pos + Vector2(0, self.size.y)
         self.bottomRight = self.pos + self.size
 
+        self.lastPos = Vector2(self.pos.x, self.pos.y)
+    
         self.center = self.size / 2

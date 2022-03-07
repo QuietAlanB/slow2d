@@ -22,47 +22,10 @@ class GameObject:
             if type(c) == Collider:
                 c.transform = self.transform
 
-                angle = self.transform.rotation * (math.pi / 180)
-
-                p = self.transform.topLeft
-                c = self.transform.center
-
-                s = math.sin(angle)
-                co = math.cos(angle)
-
-                p -= c
-
-                xNew = p.x * co - p.y * s
-                yNew = p.x * s + p.y * co
-
-                self.transform.topLeft.x = xNew + c.x
-                self.transform.topLeft.y = yNew + c.y
-
 
     # ===== add component =====
     def addComponent(self, component):
         self.components.append(component)
-
-    '''
-    def turn(self, angle):
-        c.transform = self.transform
-
-        angle = angle * (math.pi / 180)
-
-        p = self.transform.topLeft
-        c = self.transform.center
-
-        s = math.sin(angle)
-        co = math.cos(angle)
-
-        p -= c
-
-        xNew = p.x * co - p.y * s
-        yNew = p.x * s + p.y * co
-
-        self.transform.topLeft.x = xNew + c.x
-        self.transform.topLeft.y = yNew + c.y
-    '''
 
     # ===== remove component =====
     def removeComponent(self, component):
@@ -80,9 +43,7 @@ class GameObject:
 
     # ===== last update =====
     def lastUpdate(self):
-        for c in self.components:
-            if type(c) == Collider:
-                c.lastActivated = c.activated
+        self.transform.lastPos = Vector2(self.transform.pos.x, self.transform.pos.y)
 
 
     # ===== update =====
@@ -90,7 +51,7 @@ class GameObject:
         for c in self.components:
             if type(c) == Mesh:
                 # ===== square =====
-                if c.meshType == MeshType.SQUARE:   
+                if c.meshType == MeshType.SQUARE:
                     s = pygame.Surface((self.transform.size.x , self.transform.size.y), pygame.SRCALPHA)
 
                     pygame.draw.rect(s, c.color, pygame.Rect(0, 0, self.transform.size.x, self.transform.size.y))
@@ -99,17 +60,22 @@ class GameObject:
                     new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
 
                     # === all coordinate adjustments ===
-                    #self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
-                    #self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
-                    #self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
-                    #self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
 
-                    #self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
-                    self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
-                    self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
-                    self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+                    # === all coordinate adjustments ===
+                    angle = self.transform.rotation
+                    angle -= angle * 2
 
-                    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(self.transform.topLeft.x, self.transform.topLeft.y, 3, 3))
+                    self.transform.topRight.x = self.transform.center.x + ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                    self.transform.topRight.y = self.transform.center.y + ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                    self.transform.topLeft.x = self.transform.center.x - ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                    self.transform.topLeft.y = self.transform.center.y - ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                    self.transform.bottomLeft.x = self.transform.center.x - ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                    self.transform.bottomLeft.y = self.transform.center.y - ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                    self.transform.bottomRight.x = self.transform.center.x + ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                    self.transform.bottomRight.y = self.transform.center.y + ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
 
                     # === draw ===
                     screen.blit(rotated_image, (new_rect))
@@ -182,10 +148,20 @@ class GameObject:
                 new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
 
                 # === all coordinate adjustments ===
-                self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
-                self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
-                self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
-                self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
+                angle = self.transform.rotation
+                angle -= angle * 2
+
+                self.transform.topRight.x = self.transform.center.x + ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                self.transform.topRight.y = self.transform.center.y + ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                self.transform.topLeft.x = self.transform.center.x - ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                self.transform.topLeft.y = self.transform.center.y - ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                self.transform.bottomLeft.x = self.transform.center.x - ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                self.transform.bottomLeft.y = self.transform.center.y - ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
+
+                self.transform.bottomRight.x = self.transform.center.x + ((self.transform.size.x / 2) * math.cos(angle * math.pi/180)) + ((self.transform.size.y / 2) * math.sin(angle * math.pi/180)) + self.transform.pos.x - self.transform.size.x / 2
+                self.transform.bottomRight.y = self.transform.center.y + ((self.transform.size.x / 2) * math.sin(angle * math.pi/180)) - ((self.transform.size.y / 2) * math.cos(angle * math.pi/180)) + self.transform.pos.y - self.transform.size.y / 2
 
                 # === draw ===
                 if c.viewMode:
