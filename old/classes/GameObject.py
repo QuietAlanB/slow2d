@@ -1,4 +1,5 @@
-from classes.components.Collider import Collider
+from classes.components.RectCollider import RectCollider
+from classes.components.CircleCollider import CircleCollider
 from classes.components.Text import Text
 from classes.screen import screen
 from classes.components.Transform import Transform
@@ -11,43 +12,52 @@ import pygame
 from lib.vector2 import Vector2
 
 class GameObject:
-    def __init__(self, components = []):
-        self.components = components
-        self.transform = None
+        def __init__(self, components = []):
+                self.components = components
+                self.transform = None
 
-        for c in self.components:
-            if type(c) == Transform:
-                self.transform = c
+                for c in self.components:
+                        if type(c) == Transform:
+                                self.transform = c
 
-            if type(c) == Collider:
-                c.transform = self.transform
+                        if type(c) == RectCollider:
+                                c.transform = self.transform
 
-
-    # ===== add component =====
-    def addComponent(self, component):
-        self.components.append(component)
-
-    # ===== remove component =====
-    def removeComponent(self, component):
-        self.components.remove(component)
+                        if type(c) == CircleCollider:
+                                c.transform = self.transform
 
 
-    # ===== get component =====
-    def getComponent(self, component):
-        for c in self.components:
-            if type(c) == component:
-                return c
-
-        return None
+        # ===== add component =====
+        def addComponent(self, component):
+                self.components.append(component)
 
 
-    # ===== last update =====
-    def lastUpdate(self):
-        self.transform.lastPos = Vector2(self.transform.pos.x, self.transform.pos.y)
+        # ===== remove component =====
+        def removeComponent(self, component):
+                self.components.remove(component)
 
 
-    # ===== update =====
-    def update(self):
+        # ===== get component =====
+        def getComponent(self, component):
+                for c in self.components:
+                        if type(c) == component:
+                                return c
+
+                return None
+
+
+        # ===== last update =====
+        def lastUpdate(self):
+                self.transform.lastPos = Vector2(self.transform.pos.x, self.transform.pos.y)
+
+
+        # ===== update =====
+        def update(self):
+        if self.transform.rotation % 90 == 0:
+                self.transform.axisAligned = True
+        else:
+                self.transform.axisAligned = False
+
         for c in self.components:
             if type(c) == Mesh:
                 # ===== square =====
@@ -58,8 +68,6 @@ class GameObject:
 
                     rotated_image = pygame.transform.rotozoom(s, self.transform.rotation, 1)
                     new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
-
-                    # === all coordinate adjustments ===
 
                     # === all coordinate adjustments ===
                     angle = self.transform.rotation
@@ -80,24 +88,14 @@ class GameObject:
                     # === draw ===
                     screen.blit(rotated_image, (new_rect))
 
+
                 # ===== circle =====
                 elif c.meshType == MeshType.CIRCLE:
-                    s = pygame.Surface((self.transform.size.x * 2, self.transform.size.y * 2), pygame.SRCALPHA)
+                    if self.transform.size.y != self.transform.size.x:
+                        self.transform.size.y = self.transform.size.x
 
-                    gfxdraw.aaellipse(s, int(self.transform.size.x), int(self.transform.size.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
-                    gfxdraw.filled_ellipse(s, int(self.transform.size.x), int(self.transform.size.y), int(self.transform.size.x), int(self.transform.size.y), c.color)
-
-                    rotated_image = pygame.transform.rotozoom(s, self.transform.rotation, 1)
-                    new_rect = rotated_image.get_rect(center = s.get_rect(center = (self.transform.pos.x, self.transform.pos.y)).center)
-
-                    # === all coordinate adjustments ===
-                    self.transform.topLeft = Vector2(new_rect.topleft[0], new_rect.topleft[1] )
-                    self.transform.topRight = Vector2(new_rect.topright[0], new_rect.topright[1] )
-                    self.transform.bottomLeft = Vector2(new_rect.bottomleft[0], new_rect.bottomleft[1] )
-                    self.transform.bottomRight = Vector2(new_rect.bottomright[0], new_rect.bottomright[1] )
-
-                    # === draw ===
-                    screen.blit(rotated_image, (new_rect))
+                    gfxdraw.aacircle(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x), c.color)
+                    gfxdraw.filled_circle(screen, int(self.transform.pos.x), int(self.transform.pos.y), int(self.transform.size.x), c.color)
 
 
             # ===== textures =====
@@ -136,7 +134,7 @@ class GameObject:
 
 
             # ===== collider =====
-            elif type(c) == Collider:
+            elif type(c) == RectCollider:
                 c.transform = self.transform
 
                 s = pygame.Surface((self.transform.size.x , self.transform.size.y), pygame.SRCALPHA)
